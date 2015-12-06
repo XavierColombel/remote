@@ -5,7 +5,7 @@
         "configurable"
     ],
     "companyName": "pixelgamma@gmail.com",
-    "longName": "FREEBOX",
+    "longName": "FreeboxTV",
     "projectType": "pebblejs",
     "resources": {
         "media": [
@@ -48,7 +48,7 @@
         ]
     },
     "sdkVersion": "3",
-    "shortName": "FREEBOX",
+    "shortName": "FreeboxTV",
     "targetPlatforms": [
         "aplite",
         "basalt"

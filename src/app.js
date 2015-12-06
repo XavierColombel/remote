@@ -4,29 +4,71 @@ var UI = require('ui');
 var Vector2 = require('vector2');
 var Settings = require('settings');
 var ajax = require('ajax');
+var Accel = require('ui/accel');
+
+Accel.init();
+
+// CONSTANTS
+var urlBox = 'http://hd1.freebox.fr/pub/remote_control';
+var remote = Settings.option( "remote" );
+var activeWindow = 1;
+
+// FUNCTIONS
+function sendCommand(command)
+{
+  if( typeof  Settings.option( "remoteCode" + remote ) !== "undefined" &&  Settings.option( "remoteCode" + remote ) !== null ) { 
+    ajax(
+      {
+        url: urlBox + '?code=' + Settings.option( "remoteCode" + remote ) + '&key=' + command
+      },
+      function() {
+        //splash.title( "Power" );
+        console.log(command);
+      }
+    );
+  } else {
+    // ERROR
+  }
+}
+
 
 // WINDOWS
 var noConfig = new UI.Card(
 {
-  title: " Freemote",
-  body: "\nOuvrez l'outil configuration sur votre téléphone.",
+  title: "FreeboxTV",
+  body: "Ouvrez l'outil de configuration sur votre téléphone.",
   //icon: "images/icon.png",
-  style: "small"
+  style: "small",
+  scrollable: true
 });
 
 var error = new UI.Card(
 {
-  title: " Erreur",
+  title: "Erreur",
   body: "",
   //icon: "images/error.png",
   style: "small",
   scrollable: true
 });
 
-var splash = new UI.Window( {
+var loading = new UI.Card( { banner: "images/loading.png" } );
+var listMenu = new UI.Menu( {sections: [{items:[]}] } );
+var sublistMenu = new UI.Menu( {sections: [{items:[]}] } );
+
+/*var splash = new UI.Window( {
   //title: "test",
   //banner: "images/splash.png"
-} );
+} );*/
+
+var splash = new UI.Card(
+{
+title: "FreeboxTV",
+  subtitle: Settings.option( "remoteName" + remote ),
+  body: "Boutons Haut/Bas :\nVolume +/-",
+  //icon: "images/icon.png",
+  style: "small",
+  scrollable: true
+});
 
 var image = new UI.Image({
   position: new Vector2(0, 0),
@@ -38,21 +80,21 @@ splash.add(image);
 
 splash.on('click', 'select', function(e) {
       
-      console.log('http://hd1.freebox.fr/pub/remote_control?code=' + Settings.option( "remoteCode1" ) + '&key=mute');
-
-      ajax(
-        {
-          url: 'http://hd1.freebox.fr/pub/remote_control?code=' + Settings.option( "remoteCode1" ) + '&key=mute'
-        },
-        function() {
-          //splash.title( "Power" );
-        }
-      );
+  switch (activeWindow) {
       
-    });
-var loading = new UI.Card( { banner: "images/loading.png" } );
-var listMenu = new UI.Menu( {sections: [{items:[]}] } );
-var sublistMenu = new UI.Menu( {sections: [{items:[]}] } );
+    case 1:
+      sendCommand('mute');
+      break;
+         
+  }
+  
+});
+
+splash.on('accelTap', function(e) {
+  console.log('Tapped the window');
+  sendCommand('mute');
+});
+
 
 // CONFIGURATION
 Settings.config(
@@ -86,6 +128,8 @@ Settings.config(
                      "remoteName4": config_data.remoteName4,
                      "remoteCode4": config_data.remoteCode4,
                      "remote": config_data.remote});
+    remote = Settings.option( "remote" );
+    splash.subtitle(Settings.option( "remoteName" + remote ));
     
     if (DEBUG) {
       console.log("remoteName1 = " + config_data.remoteName1);
@@ -109,7 +153,7 @@ Settings.config(
 // PROGRAM START
 function programStart()
 {
-  if( typeof Settings.option( "remoteCode1" ) !== "undefined" && Settings.option( "remoteCode1" ) !== null ) {
+  if( typeof remote !== "undefined" && remote !== null ) {
     
     /*
     var textfield = new UI.Text({
